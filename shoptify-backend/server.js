@@ -24,6 +24,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "*",
+    methods: ["GET", "POST"],
   },
 });
 
@@ -32,6 +33,7 @@ app.set("io", io);
 
 // ================= SOCKET LOGIC =================
 // 🔥 DEFINE THIS ABOVE io.on
+
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);

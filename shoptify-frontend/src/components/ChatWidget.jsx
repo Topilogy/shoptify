@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
 import API from "../services/api";
 import { io } from "socket.io-client";
-import socket from "../socket";
+import socket from "../services/socket";
 import { useAuth } from "../context/AuthContext";
 
 
