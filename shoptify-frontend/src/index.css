@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+html, body, #root {
+  background: #ffffff; /* dark base */
+  margin: 0;
+  padding: 0;
+}
+
+/* =========================
+   FLOATING ANIMATION
+========================= */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-floatSlow {
+  animation: float 10s ease-in-out infinite;
+}
+
+/* =========================
+   GRADIENT ANIMATION
+========================= */
+@keyframes gradientMove {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 300% 300%;
+  animation: gradientMove 12s ease infinite;
+}
+
+/* =========================
+   YOUR EXISTING ANIMATIONS
+========================= */
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
+/* subtle glow pulse */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59,130,246,0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(59,130,246,0.6);
+  }
+}
+
+.animate-glow {
+  animation: glowPulse 3s ease-in-out infinite;
+}
