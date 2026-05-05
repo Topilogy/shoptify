@@ -249,9 +249,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/chat", require("./routes/chatRoutes"));
 
-router.get("/", (req, res) => {
-  res.json({ message: "Chat route works" });
-});
+
 
 // ================= NO CACHE =================
 app.use((req, res, next) => {

@@ -86,4 +86,8 @@ router.post("/admin/:chatId", authMiddleware, async (req, res) => {
   res.json(chat);
 });
 
+router.get("/", (req, res) => {
+  res.json({ message: "Chat route is working ✅" });
+});
+
 module.exports = router;
