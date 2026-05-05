@@ -2,7 +2,7 @@ import axios from "axios";
 
 // ✅ ONE SINGLE API INSTANCE
 const API = axios.create({
-  baseURL: "http://192.168.1.19:5000/api",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 API.interceptors.request.use((req) => {

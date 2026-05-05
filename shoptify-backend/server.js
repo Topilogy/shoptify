@@ -203,7 +203,7 @@ app.post(
 
 // ================= MIDDLEWARE =================
 app.use(cors({
-  origin: "*", // for testing only
+  origin: process.env.CLIENT_URL, 
   credentials: true
 }));
 app.use(express.json());
