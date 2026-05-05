@@ -1,10 +1,17 @@
 import { io } from "socket.io-client";
 
-const socket = io("socket.io", {
+const http = require("http");
+const { Server } = require("socket.io");
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL, 
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
+
+server.listen(PORT);
 
 export default socket;
