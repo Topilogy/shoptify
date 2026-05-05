@@ -12,32 +12,33 @@ export const AuthProvider = ({ children }) => {
 
   // ================= INIT AUTH =================
   useEffect(() => {
-    const initAuth = async () => {
-      const token = localStorage.getItem("token");
+  const initAuth = async () => {
+    const token = localStorage.getItem("token");
 
-      if (!token) {
-        setLoading(false);
-        return;
-      }
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
-      try {
-        const { data } = await API.get("/auth/me");
+    try {
+      const { data } = await API.get("/auth/me");
 
-        setUser(data);
+      setUser(data);
+      localStorage.setItem("user", JSON.stringify(data));
+    } catch (err) {
+      console.log("Auth failed:", err);
 
-        // store fresh user
-        localStorage.setItem("user", JSON.stringify(data));
-      } catch (err) {
-        console.log("Auth failed:", err);
-        localStorage.clear();
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+      // 🔥 IMPORTANT FIX
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    initAuth();
-  }, []);
+  initAuth();
+}, []);
 
   // ================= LOGIN =================
   const login = (userData, token) => {

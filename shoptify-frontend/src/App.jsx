@@ -29,7 +29,12 @@ const Layout = () => {
 
   const isAdminPage = location.pathname.startsWith("/admin");
 
-  if (loading) return null;
+  if (loading)
+  return (
+    <div className="h-screen flex items-center justify-center text-white">
+      Loading...
+    </div>
+  );
 
   return (
     <div className="relative">
