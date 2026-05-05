@@ -9,24 +9,19 @@
 //     react()
 //   ],
 // })
-
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [
-    tailwindcss(),
-    react()
-  ],
+  plugins: [tailwindcss(), react()],
 
   server: {
-    host: true, // 👈 exposes to network (same as --host)
+    host: true,
     port: 5173,
-
     proxy: {
       '/api': {
-        target: 'http://192.168.1.19:5000', // 👈 your backend IP
+        target: 'http://192.168.1.19:5000',
         changeOrigin: true,
         secure: false
       }
