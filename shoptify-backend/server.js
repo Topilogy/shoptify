@@ -207,10 +207,12 @@ app.post(
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://shoptify-frontend.vercel.app"
+    "https://shoptify-weardrop.vercel.app"
   ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
+
 app.use(express.json());
 
 // ================= TEST ROUTE =================
@@ -246,6 +248,10 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/chat", require("./routes/chatRoutes"));
+
+router.get("/", (req, res) => {
+  res.json({ message: "Chat route works" });
+});
 
 // ================= NO CACHE =================
 app.use((req, res, next) => {
