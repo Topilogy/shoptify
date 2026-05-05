@@ -82,7 +82,7 @@ const Layout = () => {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="products" element={<AdminProducts />} />
-          <Route path="/admin/chats" element={<AdminChat />} />
+          <Route path="chats" element={<AdminChat />} />
         </Route>
 
         <Route path="/success" element={<Success />} />
