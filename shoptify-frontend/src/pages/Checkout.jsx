@@ -46,6 +46,7 @@ const Checkout = () => {
       };
 
       const { data } = await initializePayment(paymentData);
+      console.log("PAYMENT RESPONSE:", data);
 
       // optional: clear cart before redirect
       // clearCart();

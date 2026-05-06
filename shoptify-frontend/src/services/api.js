@@ -5,14 +5,14 @@ const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem("token");
+API.interceptors.request.use((config) => {
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  if (token) {
-    req.headers.Authorization = `Bearer ${token}`;
+  if (user?.token) {
+    config.headers.Authorization = `Bearer ${user.token}`;
   }
 
-  return req;
+  return config;
 });
 
 export default API;
@@ -49,7 +49,7 @@ export const changePassword = (data) =>
   API.put("/auth/change-password", data);
 
 export const initializePayment = (data) =>
-  API.post("/payments", data);
+  API.post("/payments/initialize", data);
 
 export const getProductById = (id) => API.get(`/products/${id}`);
 
