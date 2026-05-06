@@ -208,7 +208,7 @@ app.use(cors({
   origin: [
     "http://localhost:5173",
     "https://shoptify-weardrop.vercel.app",
-    "https://shoptify-weardrop-sw.vercel.app" // add this too
+    "https://shoptify-production.up.railway.app/" // add this too
   ],
   credentials: true
 }));
