@@ -49,7 +49,7 @@ export const changePassword = (data) =>
   API.put("/auth/change-password", data);
 
 export const initializePayment = (data) =>
-  API.post("/payments", data);
+  API.post("/payments/initialize", data);
 
 export const getProductById = (id) => API.get(`/products/${id}`);
 
