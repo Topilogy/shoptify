@@ -48,7 +48,7 @@ const Checkout = () => {
       const { data } = await initializePayment(paymentData);
 
       // optional: clear cart before redirect
-      clearCart();
+      // clearCart();
 
       window.location.href = data.data.authorization_url;
     } catch (err) {

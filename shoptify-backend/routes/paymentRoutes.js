@@ -18,7 +18,7 @@ router.post("/initialize", authMiddleware, async (req, res) => {
         email,
         amount: amount * 100,
         metadata: { orderId },
-        callback_url: "http://localhost:5173/success",
+        callback_url: "https://shoptify-weardrop.vercel.app/success",
       },
       {
         headers: {
