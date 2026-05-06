@@ -4,7 +4,7 @@ const axios = require("axios");
 const crypto = require("crypto");
 const Order = require("../models/Order");
 const authMiddleware = require("../middleware/authMiddleware");
-const sendEmail = require("../utils/sendEMail");
+const sendEmail = require("../utils/sendEmail");
 
 
 // ================= INIT PAYMENT =================
