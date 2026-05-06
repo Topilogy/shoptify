@@ -207,9 +207,9 @@ app.post(
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://shoptify-weardrop.vercel.app"
+    "https://shoptify-weardrop.vercel.app",
+    "https://shoptify-weardrop-sw.vercel.app" // add this too
   ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
 
@@ -246,7 +246,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
-app.use("/api/chat", chatRoutes);
+
 app.use("/api/chat", require("./routes/chatRoutes"));
 
 
