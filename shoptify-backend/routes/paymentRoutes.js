@@ -49,10 +49,12 @@ router.post("/initialize", async (req, res) => {
 });
 
 // ================= VERIFY PAYMENT =================
+
 router.get("/verify/:reference", async (req, res) => {
   try {
     const { reference } = req.params;
 
+    // 🔥 Verify payment from Paystack
     const response = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -64,16 +66,32 @@ router.get("/verify/:reference", async (req, res) => {
 
     const payment = response.data.data;
 
+    // ❌ Payment failed
     if (payment.status !== "success") {
-      return res.status(400).json({ message: "Payment not successful" });
+      return res.status(400).json({
+        message: "Payment not successful",
+      });
     }
 
+    // 🔥 Get order ID from Paystack metadata
     const orderId = payment.metadata.orderId;
+
+    // 🔥 Find order in DB
     const order = await Order.findById(orderId);
+
+    // ❌ Order not found
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+      });
+    }
 
     // ✅ Prevent duplicate payment
     if (order.status === "paid") {
-      return res.json({ message: "Order already paid", order });
+      return res.json({
+        message: "Order already paid",
+        order,
+      });
     }
 
     // ✅ Update order
@@ -82,41 +100,59 @@ router.get("/verify/:reference", async (req, res) => {
     order.paidAt = new Date();
     order.paymentReference = reference;
 
-    await order.save(); // 🔥 IMPORTANT
+    await order.save();
 
-    // ✅ Send email
+    console.log("✅ Payment verified successfully");
+
+    // ✅ OPTIONAL EMAIL
+    /*
     await sendEmail({
       to: payment.customer.email,
       subject: "Your Shoptify Order Receipt",
       html: `
         <div style="font-family: Arial; padding:20px">
-            <h2 style="color: green;">Payment Successful 🎉</h2>
-            <p>Hi ${payment.customer.email},</p>
+          <h2 style="color: green;">
+            Payment Successful 🎉
+          </h2>
 
-            <p>Your order has been confirmed.</p>
+          <p>Hi ${payment.customer.email},</p>
 
-            <hr/>
+          <p>Your order has been confirmed.</p>
 
-            <p><strong>Order ID:</strong> ${order._id}</p>
-            <p><strong>Total:</strong> ₦${order.total}</p>
-            <p><strong>Status:</strong> ${order.status}</p>
+          <hr/>
 
-            <hr/>
+          <p><strong>Order ID:</strong> ${order._id}</p>
+          <p><strong>Total:</strong> ₦${order.total}</p>
+          <p><strong>Status:</strong> ${order.status}</p>
 
-            <p>Thanks for shopping with <b>Shoptify</b> 🛍️</p>
+          <hr/>
+
+          <p>
+            Thanks for shopping with <b>Shoptify</b> 🛍️
+          </p>
         </div>
-        `,
+      `,
     });
 
     console.log("📧 Receipt email sent");
+    */
 
+    // ✅ SUCCESS RESPONSE
     return res.json({
       message: "Payment verified & order updated",
       order,
     });
+
   } catch (err) {
-    console.log("VERIFY ERROR:", err.response?.data || err.message);
-    res.status(500).json({ message: "Verification failed" });
+    console.log(
+      "VERIFY ERROR:",
+      err.response?.data || err.message
+    );
+
+    return res.status(500).json({
+      message: "Verification failed",
+      error: err.response?.data || err.message,
+    });
   }
 });
 
