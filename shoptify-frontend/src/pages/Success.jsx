@@ -22,7 +22,7 @@ const Success = () => {
         const token = localStorage.getItem("token");
 
         const { data } = await axios.get(
-          `http://localhost:5000/api/payments/verify/${reference}`,
+          `https://shoptify-production.up.railway.app/api/payments/verify/${reference}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
