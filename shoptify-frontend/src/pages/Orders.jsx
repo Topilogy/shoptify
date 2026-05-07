@@ -140,7 +140,7 @@ const Orders = () => {
                   ) : (
                     <div className="mt-4">
                       <a
-                        href={`http://localhost:5000/api/orders/receipt/${order._id}`}
+                        href={`https://shoptify-production.up.railway.app/api/orders/receipt/${order._id}`}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"

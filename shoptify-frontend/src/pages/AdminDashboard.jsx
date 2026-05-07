@@ -110,7 +110,7 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         const statsRes = await axios.get(
-          "http://localhost:5000/api/orders/admin/stats"
+          "https://shoptify-production.up.railway.app/api/orders/admin/stats"
         );
         setStats(statsRes.data || { totalOrders: 0, totalRevenue: 0 });
 
