@@ -10,6 +10,8 @@ const sendEmail = require("../utils/sendEmail");
 // ================= INIT PAYMENT =================
 router.post("/initialize", async (req, res) => {
   try {
+    console.log("BODY:", req.body);
+
     const { email, amount, orderId } = req.body;
 
     const response = await axios.post(
@@ -18,23 +20,29 @@ router.post("/initialize", async (req, res) => {
         email,
         amount: amount * 100,
         metadata: { orderId },
-        callback_url: "https://shoptify-weardrop.vercel.app/success",
+
+        callback_url:
+          "https://shoptify-weardrop.vercel.app/success",
       },
       {
         headers: {
           Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
-        timeout: 15000,
       }
     );
 
-    return res.json(response.data);
-  } catch (err) {
-    console.log("PAYSTACK ERROR:", err.response?.data || err.message);
+    console.log("PAYSTACK RESPONSE:", response.data);
 
-    return res.status(500).json({
-      message: "Payment service unstable, try again later",
+    res.json(response.data);
+
+  } catch (err) {
+    console.log(
+      "PAYSTACK ERROR:",
+      err.response?.data || err.message
+    );
+
+    res.status(500).json({
       error: err.response?.data || err.message,
     });
   }
