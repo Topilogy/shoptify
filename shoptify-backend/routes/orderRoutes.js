@@ -60,9 +60,9 @@ router.post("/", async (req, res) => {
     const { items, total } = req.body;
 
     const order = await Order.create({
-      userId: req.user._id,
       items,
       total,
+      status: "pending",
     });
 
     res.status(201).json(order);
