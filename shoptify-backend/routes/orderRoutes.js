@@ -55,7 +55,7 @@ router.put("/admin/:id/status", authMiddleware, async (req, res) => {
 
 
 // 📦 CREATE ORDER
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
   try {
     const { items, total } = req.body;
 

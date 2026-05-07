@@ -8,7 +8,7 @@ const sendEmail = require("../utils/sendEmail");
 
 
 // ================= INIT PAYMENT =================
-router.post("/initialize", async (req, res) => {
+router.post("/initialize", authMiddleware, async (req, res) => {
   try {
     console.log("BODY:", req.body);
 
