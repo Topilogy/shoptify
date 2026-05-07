@@ -2,7 +2,7 @@ import axios from "axios";
 
 // ✅ ONE SINGLE API INSTANCE
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: "https://shoptify-production.up.railway.app/api",
 });
 
 API.interceptors.request.use((config) => {
