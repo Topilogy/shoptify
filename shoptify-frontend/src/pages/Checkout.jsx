@@ -46,12 +46,14 @@ const Checkout = () => {
       };
 
       const { data } = await initializePayment(paymentData);
-      console.log("PAYMENT RESPONSE:", data);
 
       // optional: clear cart before redirect
-      // clearCart();
+      localStorage.setItem("pendingOrder", JSON.stringify(order));
+
+      clearCart();
 
       window.location.href = data.data.authorization_url;
+
     } catch (err) {
       console.error(err);
       alert("Payment failed");
