@@ -17,6 +17,8 @@ const Checkout = () => {
     try {
       setLoading(true);
 
+      const user = JSON.parse(localStorage.getItem("user"));
+      
       const stored = JSON.parse(localStorage.getItem("user")); 
 
       if (!user) {
