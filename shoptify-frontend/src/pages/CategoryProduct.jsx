@@ -11,7 +11,7 @@ const CategoryProduct = () => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/products/category/${categoryName}`
+          `https://shoptify-production.up.railway.app/api/products/category/${categoryName}`
         );
         setProducts(res.data);
       } catch (err) {
