@@ -12,23 +12,30 @@ const Login = () => {
   const { login } = useAuth();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const { data } = await loginUser({ email, password });
+  try {
+    const { data } = await loginUser({ email, password });
 
-      login(data.user); // 🔥 triggers UI update
-      localStorage.setItem("token", data.token);
+    // ✅ SAVE EVERYTHING INCLUDING TOKEN
+    localStorage.setItem("user", JSON.stringify(data));
 
-      if (data.user.role === "admin") {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/");
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Login failed");
+    // ✅ optional separate token storage
+    localStorage.setItem("token", data.token);
+
+    // ✅ update auth context
+    login(data.user);
+
+    if (data.user.role === "admin") {
+      navigate("/admin/dashboard");
+    } else {
+      navigate("/");
     }
-  };
+
+  } catch (err) {
+    alert(err.response?.data?.message || "Login failed");
+  }
+};
 
   return (
     <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">

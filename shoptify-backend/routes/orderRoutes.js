@@ -60,13 +60,17 @@ router.post("/", authMiddleware, async (req, res) => {
     const { items, total } = req.body;
 
     const order = await Order.create({
+      userId: req.user._id,   // 🔥 FIX HERE
       items,
       total,
       status: "pending",
     });
 
     res.status(201).json(order);
+
   } catch (err) {
+    console.log("CREATE ORDER ERROR:", err.message);
+    
     res.status(500).json({ message: err.message });
   }
 });
