@@ -40,7 +40,7 @@ const Checkout = () => {
       }
 
       const paymentData = {
-        email: user.email,
+        email: stored.user.email,  
         amount: total,
         orderId: order._id,
       };
