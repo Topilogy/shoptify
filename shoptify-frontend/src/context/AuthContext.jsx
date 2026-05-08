@@ -23,15 +23,17 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await API.get("/auth/me");
 
-      setUser(data);
-      localStorage.setItem("user", JSON.stringify(data));
+      setUser(data.user || data);
+
     } catch (err) {
       console.log("Auth failed:", err);
 
       // 🔥 IMPORTANT FIX
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+
       setUser(null);
+      
     } finally {
       setLoading(false);
     }
@@ -41,16 +43,26 @@ export const AuthProvider = ({ children }) => {
 }, []);
 
   // ================= LOGIN =================
-  const login = (userData, token) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("token", token);
+  const login = (data) => {
+    setUser(data.user);
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(data)
+    );
+
+    localStorage.setItem(
+      "token",
+      data.token
+    );
   };
 
   // ================= LOGOUT =================
   const logout = () => {
     setUser(null);
-    localStorage.clear();
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   };
 
   return (

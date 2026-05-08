@@ -15,16 +15,12 @@ const Login = () => {
   e.preventDefault();
 
   try {
-    const { data } = await loginUser({ email, password });
+    const { data } = await loginUser({
+      email,
+      password,
+    });
 
-    // ✅ SAVE EVERYTHING INCLUDING TOKEN
-    localStorage.setItem("user", JSON.stringify(data));
-
-    // ✅ optional separate token storage
-    localStorage.setItem("token", data.token);
-
-    // ✅ update auth context
-    login(data.user);
+    login(data);
 
     if (data.user.role === "admin") {
       navigate("/admin/dashboard");
@@ -33,7 +29,10 @@ const Login = () => {
     }
 
   } catch (err) {
-    alert(err.response?.data?.message || "Login failed");
+    alert(
+      err.response?.data?.message ||
+      "Login failed"
+    );
   }
 };
 
