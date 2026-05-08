@@ -14,6 +14,15 @@ router.post("/initialize", authMiddleware, async (req, res) => {
 
     const { email, amount, orderId } = req.body;
 
+    console.log({
+      email,
+      amount,
+      orderId,
+      secret: process.env.PAYSTACK_SECRET_KEY
+        ? "EXISTS"
+        : "MISSING",
+    });
+
     const response = await axios.post(
       "https://api.paystack.co/transaction/initialize",
       {
