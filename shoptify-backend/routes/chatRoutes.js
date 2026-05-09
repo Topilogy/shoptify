@@ -31,10 +31,10 @@ router.post("/", authMiddleware, async (req, res) => {
     }
 
     const message = {
-      sender: "user",
-      text,
-      createdAt: new Date(),
-    };
+  senderType: "user", // instead of sender
+  text,
+  createdAt: new Date(),
+};
 
     chat.messages.push(message);
     await chat.save();
@@ -94,10 +94,7 @@ router.post("/admin/:chatId", authMiddleware, async (req, res) => {
 
   const message = {
   senderType: "admin",
-  senderId: req.user._id,
-  senderName: req.user.name,
   text,
-  createdAt: new Date(),
 };
 
   chat.messages.push(message);

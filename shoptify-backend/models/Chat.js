@@ -1,19 +1,7 @@
 const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema({
-  senderType: {
-    type: String,
-    enum: ["user", "admin"],
-    required: true,
-  },
-
-  senderId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  },
-
-  senderName: String,
-
+  sender: { type: String, enum: ["user", "admin"], required: true },
   text: String,
   createdAt: { type: Date, default: Date.now },
 });
