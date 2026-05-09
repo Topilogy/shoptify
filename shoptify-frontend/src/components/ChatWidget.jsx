@@ -40,10 +40,10 @@ const ChatWidget = () => {
         text: input,
     });
 
-    // const message = {
-    //   sender: "user",
-    //   text: input,
-    // };
+    const message = {
+      sender: "user",
+      text: input,
+    };
 
     socket.emit("sendMessage", {
       chatId,
