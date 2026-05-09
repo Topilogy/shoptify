@@ -36,6 +36,11 @@ const ChatWidget = () => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
+    if (!user?._id) {
+      alert("Please login first");
+      return;
+    }
+
     const { data } = await API.post("/chat", {
         text: input,
     });
@@ -55,9 +60,11 @@ const ChatWidget = () => {
     setInput("");
   };
 
-  useEffect(() => {
+ useEffect(() => {
+  if (user?._id) {
     fetchChat();
-  }, []);
+  }
+}, [user]);
 
   // ================= SOCKET LISTENER =================
   useEffect(() => {
@@ -80,13 +87,20 @@ useEffect(() => {
 
   // ================= LOAD CHAT =================
   useEffect(() => {
-    const interval = setInterval(async () => {
+  if (!user?._id) return;
+
+  const interval = setInterval(async () => {
+    try {
       const { data } = await API.get("/chat");
       setMessages(data.messages || []);
-    }, 3000);
+    } catch (err) {
+      console.log(err);
+    }
+  }, 3000);
 
-    return () => clearInterval(interval);
-  }, []);
+  return () => clearInterval(interval);
+
+}, [user]);
 
   const handleTyping = (e) => {
   setInput(e.target.value);
@@ -162,17 +176,22 @@ useEffect(() => {
           {/* MESSAGES */}
           <div className="flex-1 p-3 overflow-y-auto max-h-80">
             {messages.map((msg, i) => {
-              const isUser = msg.sender === "user";
+              const isUser = msg.senderType === "user";
 
               return (
                 <div
                   key={i}
                   className={`text-sm p-2 rounded-lg max-w-[75%] mb-2 ${
-                    isUser
-                      ? "bg-blue-600 text-white ml-auto"
-                      : "bg-gray-100"
+                    isUser ? "bg-blue-600 text-white ml-auto" : "bg-gray-100"
                   }`}
                 >
+                  {/* 👇 ADD THIS */}
+                  <div className="text-[10px] opacity-70 mb-1">
+                    {msg.senderType === "user"
+                      ? msg.senderName || "You"
+                      : "Support"}
+                  </div>
+
                   {msg.text}
                 </div>
               );

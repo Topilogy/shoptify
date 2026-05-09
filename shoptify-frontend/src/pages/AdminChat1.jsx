@@ -26,6 +26,7 @@ const AdminChat = () => {
   const fetchChats = async () => {
     try {
         const { data } = await API.get("/chat/admin/all");
+        console.log("ADMIN CHAT RESPONSE:", data); 
         setChats(Array.isArray(data) ? data : []);
     } catch (err) {
         console.error("FULL ERROR:", err.response?.data || err.message);
@@ -202,7 +203,7 @@ const AdminChat = () => {
                   : "text-gray-900"
               }`}
             >
-              {chat.userId?.name || "User"}
+              {chat.userId?.name || chat.userId?.email || "Customer"}
             </p>
 
             <p
