@@ -47,10 +47,10 @@ const ChatWidget = () => {
 
     socket.emit("sendMessage", {
       chatId,
-    //   message,
+      message,
     });
 
-    // setMessages((prev) => [...prev, message]);
+    setMessages((prev) => [...prev, message]);
     setMessages(data.messages);
     setInput("");
   };
