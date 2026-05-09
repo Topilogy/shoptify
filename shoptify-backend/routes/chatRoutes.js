@@ -44,15 +44,21 @@ router.post("/", authMiddleware, async (req, res) => {
 
 // get all chats (dashboard)
 router.get("/admin/all", authMiddleware, async (req, res) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ message: "Access denied" });
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const chats = await Chat.find()
+      .populate("userId", "name email lastSeen")
+      .lean();
+
+    console.log("CHATS DEBUG:", JSON.stringify(chats, null, 2));
+
+    res.json(chats);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-  
-  const chats = await Chat.find()
-    .populate("userId", "name email lastSeen")
-    .sort({ updatedAt: -1 });
-    console.log(JSON.stringify(chats, null, 2));
-  res.json(chats);
 });
 
 router.get("/:chatId", async (req, res) => {
