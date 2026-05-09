@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
 import API from "../services/api";
 import { io } from "socket.io-client";
-import socket from "../services/socket";
+import socket from "../socket";
 import { useAuth } from "../context/AuthContext";
 
 
@@ -36,11 +36,6 @@ const ChatWidget = () => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    if (!user?._id) {
-      alert("Please login first");
-      return;
-    }
-
     const { data } = await API.post("/chat", {
         text: input,
     });
@@ -60,11 +55,9 @@ const ChatWidget = () => {
     setInput("");
   };
 
- useEffect(() => {
-  if (user?._id) {
+  useEffect(() => {
     fetchChat();
-  }
-}, [user]);
+  }, []);
 
   // ================= SOCKET LISTENER =================
   useEffect(() => {
@@ -87,20 +80,13 @@ useEffect(() => {
 
   // ================= LOAD CHAT =================
   useEffect(() => {
-  if (!user?._id) return;
-
-  const interval = setInterval(async () => {
-    try {
+    const interval = setInterval(async () => {
       const { data } = await API.get("/chat");
       setMessages(data.messages || []);
-    } catch (err) {
-      console.log(err);
-    }
-  }, 3000);
+    }, 3000);
 
-  return () => clearInterval(interval);
-
-}, [user]);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleTyping = (e) => {
   setInput(e.target.value);

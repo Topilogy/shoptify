@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useRef } from "react";
 import { io } from "socket.io-client";
 import  API  from "../services/api";
-import socket from "../services/socket";
+import socket from "../socket";
 import { useAuth } from "../context/AuthContext";
 
 
