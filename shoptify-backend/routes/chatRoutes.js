@@ -6,10 +6,6 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 // ================= USER =================
 
-router.get("/", (req, res) => {
-  res.json({ message: "Chat route is working ✅" });
-});
-
 // get user chat
 router.get("/", authMiddleware, async (req, res) => {
   const chat = await Chat.findOne({ userId: req.user._id });
@@ -89,7 +85,5 @@ router.post("/admin/:chatId", authMiddleware, async (req, res) => {
 
   res.json(chat);
 });
-
-
 
 module.exports = router;
