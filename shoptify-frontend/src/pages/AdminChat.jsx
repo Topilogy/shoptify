@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useRef } from "react";
 import { io } from "socket.io-client";
 import  API  from "../services/api";
-import socket from "../socket";
+import socket from "../services/socket";
 import { useAuth } from "../context/AuthContext";
 
 
@@ -318,7 +318,8 @@ const AdminChat = () => {
                       : "bg-white text-gray-800 rounded-bl-none border border-gray-100"
                   }`}
               >
-                {msg.text}
+                <p>{selectedChat.userId?.name}</p>
+<p>{selectedChat.userId?.email}</p>
               </div>
             </div>
           );
