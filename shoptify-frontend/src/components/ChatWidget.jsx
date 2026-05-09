@@ -176,17 +176,22 @@ useEffect(() => {
           {/* MESSAGES */}
           <div className="flex-1 p-3 overflow-y-auto max-h-80">
             {messages.map((msg, i) => {
-              const isUser = msg.sender === "user";
+              const isUser = msg.senderType === "user";
 
               return (
                 <div
                   key={i}
                   className={`text-sm p-2 rounded-lg max-w-[75%] mb-2 ${
-                    isUser
-                      ? "bg-blue-600 text-white ml-auto"
-                      : "bg-gray-100"
+                    isUser ? "bg-blue-600 text-white ml-auto" : "bg-gray-100"
                   }`}
                 >
+                  {/* 👇 ADD THIS */}
+                  <div className="text-[10px] opacity-70 mb-1">
+                    {msg.senderType === "user"
+                      ? msg.senderName || "You"
+                      : "Support"}
+                  </div>
+
                   {msg.text}
                 </div>
               );

@@ -203,7 +203,7 @@ const AdminChat = () => {
                   : "text-gray-900"
               }`}
             >
-              {chat.userId?.name || "User"}
+              {chat.userId?.name || chat.userId?.email || "Customer"}
             </p>
 
             <p
