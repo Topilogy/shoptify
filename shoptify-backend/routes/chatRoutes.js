@@ -47,11 +47,11 @@ router.get("/admin/all", authMiddleware, async (req, res) => {
   if (req.user.role !== "admin") {
     return res.status(403).json({ message: "Access denied" });
   }
-
+  
   const chats = await Chat.find()
     .populate("userId", "name email lastSeen")
     .sort({ updatedAt: -1 });
-
+    console.log(JSON.stringify(chats, null, 2));
   res.json(chats);
 });
 
