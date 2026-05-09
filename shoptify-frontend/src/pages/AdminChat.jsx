@@ -318,8 +318,7 @@ const AdminChat = () => {
                       : "bg-white text-gray-800 rounded-bl-none border border-gray-100"
                   }`}
               >
-                <p>{selectedChat.userId?.name}</p>
-<p>{selectedChat.userId?.email}</p>
+                {msg.text}
               </div>
             </div>
           );
