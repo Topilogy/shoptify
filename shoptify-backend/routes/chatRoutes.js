@@ -14,32 +14,48 @@ router.get("/", authMiddleware, async (req, res) => {
 
 // send message
 router.post("/", authMiddleware, async (req, res) => {
-  const { text } = req.body;
+  try {
+    const { text } = req.body;
 
-  let chat = await Chat.findOne({ userId: req.user._id });
+    console.log("CHAT REQUEST:", req.user, text);
 
-  if (!chat) {
-    chat = await Chat.create({
-      userId: req.user._id,
-      messages: [],
+    if (!text) {
+      return res.status(400).json({ message: "Message text is required" });
+    }
+
+    let chat = await Chat.findOne({ userId: req.user._id });
+
+    if (!chat) {
+      chat = await Chat.create({
+        userId: req.user._id,
+        messages: [],
+      });
+    }
+
+    const message = {
+      senderType: "user",
+      senderId: req.user._id,
+      senderName: req.user.name,
+      text,
+      createdAt: new Date(),
+    };
+
+    chat.messages.push(message);
+    await chat.save();
+
+    const io = req.app.get("io");
+
+    io.to(chat._id.toString()).emit("receiveMessage", {
+      chatId: chat._id,
+      ...message,
     });
+
+    res.json(chat);
+
+  } catch (err) {
+    console.error("CHAT ERROR 🔥:", err);
+    res.status(500).json({ message: err.message });
   }
-
-  const message = {
-  senderType: "user",
-  senderId: req.user._id,
-  senderName: req.user.name,
-  text,
-  createdAt: new Date(),
-};
-  chat.messages.push(message);
-  await chat.save();
-
-  const io = req.app.get("io");
-
-  io.to(chat._id.toString()).emit("receiveMessage", message);
-
-  res.json(chat);
 });
 
 // ================= ADMIN =================
