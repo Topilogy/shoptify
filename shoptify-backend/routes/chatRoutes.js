@@ -26,11 +26,10 @@ router.post("/", authMiddleware, async (req, res) => {
   }
 
   const message = {
-    chatId: chat._id,
     sender: "user",
     text,
+    createdAt: new Date(),
   };
-
   chat.messages.push(message);
   await chat.save();
 
