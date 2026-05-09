@@ -15,12 +15,17 @@ router.get("/", authMiddleware, async (req, res) => {
 // send message
 router.post("/", authMiddleware, async (req, res) => {
   try {
+    console.log("🔥 BODY:", req.body);
+    console.log("🔥 USER:", req.user);
+
     const { text } = req.body;
 
-    console.log("CHAT REQUEST:", req.user, text);
-
     if (!text) {
-      return res.status(400).json({ message: "Message text is required" });
+      return res.status(400).json({ message: "Text is required" });
+    }
+
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated" });
     }
 
     let chat = await Chat.findOne({ userId: req.user._id });
@@ -35,7 +40,7 @@ router.post("/", authMiddleware, async (req, res) => {
     const message = {
       senderType: "user",
       senderId: req.user._id,
-      senderName: req.user.name,
+      senderName: req.user.name || "User",
       text,
       createdAt: new Date(),
     };
@@ -50,11 +55,14 @@ router.post("/", authMiddleware, async (req, res) => {
       ...message,
     });
 
-    res.json(chat);
+    return res.json(chat);
 
   } catch (err) {
-    console.error("CHAT ERROR 🔥:", err);
-    res.status(500).json({ message: err.message });
+    console.error("🔥 CHAT ROUTE CRASH:", err);
+    return res.status(500).json({
+      message: err.message,
+      stack: err.stack,
+    });
   }
 });
 
@@ -107,7 +115,10 @@ router.post("/admin/:chatId", authMiddleware, async (req, res) => {
   chat.messages.push(message);
   await chat.save();
 
-  io.to(chat._id.toString()).emit("receiveMessage", message);
+  io.to(chat._id.toString()).emit("receiveMessage", {
+    chatId: chat._id,
+    ...message,
+  });
 
   res.json(chat);
 });
