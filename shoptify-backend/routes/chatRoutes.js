@@ -38,12 +38,11 @@ router.post("/", authMiddleware, async (req, res) => {
     }
 
     const message = {
-      senderType: "user",
-      senderId: req.user._id,
-      senderName: req.user.name || "User",
-      text,
-      createdAt: new Date(),
-    };
+  sender: "user",
+  senderName: req.user.name, // ✅ now valid
+  senderId: req.user._id,
+  text,
+};
 
     chat.messages.push(message);
     await chat.save();
