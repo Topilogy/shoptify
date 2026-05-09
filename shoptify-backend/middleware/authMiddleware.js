@@ -13,17 +13,22 @@ module.exports = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(decoded.id).select("name email role");
+    const user = await User.findById(decoded.id);
 
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }
 
-    req.user = user; // ✅ NOW name exists
+    req.user = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
 
     next();
   } catch (err) {
-    console.error("AUTH ERROR:", err.message);
+    console.error("AUTH ERROR:", err);
     res.status(401).json({ message: "Invalid token" });
   }
 };

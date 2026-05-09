@@ -15,17 +15,10 @@ router.get("/", authMiddleware, async (req, res) => {
 // send message
 router.post("/", authMiddleware, async (req, res) => {
   try {
-    console.log("🔥 BODY:", req.body);
-    console.log("🔥 USER:", req.user);
-
     const { text } = req.body;
 
     if (!text) {
-      return res.status(400).json({ message: "Text is required" });
-    }
-
-    if (!req.user) {
-      return res.status(401).json({ message: "User not authenticated" });
+      return res.status(400).json({ message: "Message required" });
     }
 
     let chat = await Chat.findOne({ userId: req.user._id });
@@ -38,11 +31,10 @@ router.post("/", authMiddleware, async (req, res) => {
     }
 
     const message = {
-  sender: "user",
-  senderName: req.user.name, // ✅ now valid
-  senderId: req.user._id,
-  text,
-};
+      sender: "user",
+      text,
+      createdAt: new Date(),
+    };
 
     chat.messages.push(message);
     await chat.save();
@@ -57,11 +49,8 @@ router.post("/", authMiddleware, async (req, res) => {
     return res.json(chat);
 
   } catch (err) {
-    console.error("🔥 CHAT ROUTE CRASH:", err);
-    return res.status(500).json({
-      message: err.message,
-      stack: err.stack,
-    });
+    console.error("CHAT ERROR:", err);
+    return res.status(500).json({ message: err.message });
   }
 });
 
