@@ -40,17 +40,17 @@ const ChatWidget = () => {
         text: input,
     });
 
-    const message = {
-      sender: "user",
-      text: input,
-    };
+    // const message = {
+    //   sender: "user",
+    //   text: input,
+    // };
 
     socket.emit("sendMessage", {
       chatId,
-      message,
+    //   message,
     });
 
-    setMessages((prev) => [...prev, message]);
+    // setMessages((prev) => [...prev, message]);
     setMessages(data.messages);
     setInput("");
   };
@@ -75,18 +75,7 @@ const ChatWidget = () => {
 useEffect(() => {
   if (!user?._id) return;
 
-  const initChat = async () => {
-    const { data } = await API.get("/chat");
-
-    setMessages(data.messages || []);
-
-    if (data._id) {
-      setChatId(data._id);
-      socket.emit("joinChat", data._id);
-    }
-  };
-
-  initChat();
+  socket.emit("registerUser", user._id);
 }, [user]);
 
   // ================= LOAD CHAT =================
