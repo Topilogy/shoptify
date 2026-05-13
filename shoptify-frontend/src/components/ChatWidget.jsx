@@ -90,7 +90,14 @@ useEffect(() => {
 }, [user]);
 
   // ================= LOAD CHAT =================
-  
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const { data } = await API.get("/chat");
+      setMessages(data.messages || []);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleTyping = (e) => {
   setInput(e.target.value);
