@@ -15,7 +15,9 @@ const ChatWidget = () => {
   const [chatId, setChatId] = useState(null);
 //   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  let typingTimeout = null;
+
+  const typingRef = useRef(null);
+  // let typingTimeout = null;
   
 
   const { user } = useAuth();
@@ -40,17 +42,17 @@ const ChatWidget = () => {
         text: input,
     });
 
-    // const message = {
-    //   sender: "user",
-    //   text: input,
-    // };
+    const message = {
+      sender: "user",
+      text: input,
+    };
 
     socket.emit("sendMessage", {
       chatId,
-    //   message,
+      message,
     });
 
-    // setMessages((prev) => [...prev, message]);
+    setMessages((prev) => [...prev, message]);
     setMessages(data.messages);
     setInput("");
   };
@@ -62,48 +64,53 @@ const ChatWidget = () => {
   // ================= SOCKET LISTENER =================
   useEffect(() => {
     const handler = (msg) => {
+      if (msg.chatId === chatId) {
         setMessages((prev) => [...prev, msg]);
+      }
     };
 
     socket.on("receiveMessage", handler);
 
-    return () => {
-        socket.off("receiveMessage", handler);
-    };
-  }, []);
+    return () => socket.off("receiveMessage", handler);
+  }, [chatId]);
 
 useEffect(() => {
   if (!user?._id) return;
 
-  socket.emit("registerUser", user._id);
+  const initChat = async () => {
+    const { data } = await API.get("/chat");
+
+    setMessages(data.messages || []);
+
+    if (data._id) {
+      setChatId(data._id);
+      socket.emit("joinChat", data._id);
+    }
+  };
+
+  initChat();
 }, [user]);
 
   // ================= LOAD CHAT =================
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const { data } = await API.get("/chat");
-      setMessages(data.messages || []);
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
+  
 
   const handleTyping = (e) => {
-  setInput(e.target.value);
+    setInput(e.target.value);
 
-  console.log("Typing event sent", chatId);
+    socket.emit("typing", {
+      chatId,
+      sender: "user",
+    });
 
-  socket.emit("typing", {
-    chatId,
-    sender: "user",
-  });
+    if (typingRef.current) clearTimeout(typingRef.current);
 
-  clearTimeout(window.typingTimeout);
-
-  window.typingTimeout = setTimeout(() => {
-    socket.emit("stopTyping", { chatId });
-  }, 1000);
-};
+    typingRef.current = setTimeout(() => {
+      socket.emit("stopTyping", {
+        chatId,
+        sender: "user",
+      });
+    }, 1000);
+  };
 
   const handleStopTyping = () => {
     socket.emit("stopTyping", {
