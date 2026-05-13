@@ -75,18 +75,22 @@ const ChatWidget = () => {
 useEffect(() => {
   if (!user?._id) return;
 
-  socket.emit("registerUser", user._id);
+  const initChat = async () => {
+    const { data } = await API.get("/chat");
+
+    setMessages(data.messages || []);
+
+    if (data._id) {
+      setChatId(data._id);
+      socket.emit("joinChat", data._id);
+    }
+  };
+
+  initChat();
 }, [user]);
 
   // ================= LOAD CHAT =================
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const { data } = await API.get("/chat");
-      setMessages(data.messages || []);
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
+  
 
   const handleTyping = (e) => {
   setInput(e.target.value);

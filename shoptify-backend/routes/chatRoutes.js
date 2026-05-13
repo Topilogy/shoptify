@@ -80,32 +80,6 @@ router.get("/:chatId", async (req, res) => {
   res.json(chat);
 });
 
-// send admin reply
-router.post("/admin/:chatId", authMiddleware, async (req, res) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ message: "Access denied" });
-  }
 
-  const { text } = req.body;
-
-  const chat = await Chat.findById(req.params.chatId);
-
-  const io = req.app.get("io");
-
-  const message = {
-  senderType: "admin",
-  text,
-};
-
-  chat.messages.push(message);
-  await chat.save();
-
-  io.to(chat._id.toString()).emit("receiveMessage", {
-    chatId: chat._id,
-    ...message,
-  });
-
-  res.json(chat);
-});
 
 module.exports = router;
