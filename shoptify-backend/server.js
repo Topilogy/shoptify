@@ -239,7 +239,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
-const chatRoutes = require("./routes/chatRoutes");
+const chatRoutes = require("./routes/chatRoutes2");
 
 app.use("/api/products", productRoutes);
 app.use("/api/auth", authRoutes);
@@ -247,7 +247,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
 
-app.use("/api/chat", require("./routes/chatRoutes"));
+app.use("/api/chat", require("./routes/chatRoutes2"));
 
 
 

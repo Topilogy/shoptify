@@ -6,10 +6,6 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 // ================= USER =================
 
-router.get("/", (req, res) => {
-  res.json({ message: "Chat route is working ✅" });
-});
-
 // get user chat
 router.get("/", authMiddleware, async (req, res) => {
   const chat = await Chat.findOne({ userId: req.user._id });
@@ -18,46 +14,65 @@ router.get("/", authMiddleware, async (req, res) => {
 
 // send message
 router.post("/", authMiddleware, async (req, res) => {
-  const { text } = req.body;
+  try {
+    const { text } = req.body;
 
-  let chat = await Chat.findOne({ userId: req.user._id });
+    if (!text) {
+      return res.status(400).json({ message: "Message required" });
+    }
 
-  if (!chat) {
-    chat = await Chat.create({
-      userId: req.user._id,
-      messages: [],
+    let chat = await Chat.findOne({ userId: req.user._id });
+
+    if (!chat) {
+      chat = await Chat.create({
+        userId: req.user._id,
+        messages: [],
+      });
+    }
+
+    const message = {
+  senderType: "user", // instead of sender
+  text,
+  createdAt: new Date(),
+};
+
+    chat.messages.push(message);
+    await chat.save();
+
+    const io = req.app.get("io");
+
+    io.to(chat._id.toString()).emit("receiveMessage", {
+      chatId: chat._id,
+      ...message,
     });
+
+    return res.json(chat);
+
+  } catch (err) {
+    console.error("CHAT ERROR:", err);
+    return res.status(500).json({ message: err.message });
   }
-
-  const message = {
-    chatId: chat._id,
-    sender: "user",
-    text,
-  };
-
-  chat.messages.push(message);
-  await chat.save();
-
-  const io = req.app.get("io");
-
-  io.to(chat._id.toString()).emit("receiveMessage", message);
-
-  res.json(chat);
 });
 
 // ================= ADMIN =================
 
 // get all chats (dashboard)
 router.get("/admin/all", authMiddleware, async (req, res) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).json({ message: "Access denied" });
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const chats = await Chat.find()
+      .populate("userId", "name email lastSeen")
+      .lean();
+
+    console.log("CHATS DEBUG:", JSON.stringify(chats, null, 2));
+
+    res.json(chats);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-
-  const chats = await Chat.find()
-    .populate("userId", "name email lastSeen")
-    .sort({ updatedAt: -1 });
-
-  res.json(chats);
 });
 
 router.get("/:chatId", async (req, res) => {
@@ -78,18 +93,19 @@ router.post("/admin/:chatId", authMiddleware, async (req, res) => {
   const io = req.app.get("io");
 
   const message = {
-    sender: "admin",
-    text,
-  };
+  senderType: "admin",
+  text,
+};
 
   chat.messages.push(message);
   await chat.save();
 
-  io.to(chat._id.toString()).emit("receiveMessage", message);
+  io.to(chat._id.toString()).emit("receiveMessage", {
+    chatId: chat._id,
+    ...message,
+  });
 
   res.json(chat);
 });
-
-
 
 module.exports = router;
