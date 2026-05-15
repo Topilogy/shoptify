@@ -108,33 +108,33 @@ socket.on("stopTyping", ({ chatId, sender }) => {
 
   // ================= DISCONNECT =================
   socket.on("disconnect", async () => {
-    try {
-      // remove user from online map
-      for (let [userId, sockId] of onlineUsers.entries()) {
-        if (sockId === socket.id) {
-          onlineUsers.delete(userId);
-          break;
+      try {
+
+        for (let [userId, data] of onlineUsers.entries()) {
+
+          if (data.socketId === socket.id) {
+
+            onlineUsers.delete(userId);
+
+            const User = require("./models/User");
+
+            await User.findByIdAndUpdate(userId, {
+              lastSeen: new Date(),
+            });
+
+            break;
+          }
         }
+
+        io.emit("onlineUsers", Array.from(onlineUsers.keys()));
+
+        console.log("User disconnected:", socket.id);
+
+      } catch (err) {
+        console.log("Disconnect error:", err.message);
       }
-
-      // update last seen
-      if (socket.userId) {
-        const User = require("./models/User");
-
-        await User.findByIdAndUpdate(socket.userId, {
-          lastSeen: new Date(),
-        });
-      }
-
-      io.emit("onlineUsers", Array.from(onlineUsers.keys()));
-
-      console.log("User disconnected:", socket.id);
-
-    } catch (err) {
-      console.log("Disconnect error:", err.message);
-    }
+    });
   });
-});
 
 setInterval(() => {
   const now = Date.now();

@@ -143,30 +143,66 @@ const AdminChat = () => {
     }, [user]);
 
     useEffect(() => {
-  socket.on("typing", (data) => {
-    console.log("Typing event received:", data);
 
-    if (data.chatId === activeChat?._id) {
+  const typingHandler = (data) => {
+
+    if (
+      data.chatId === chatId &&
+      data.sender === "admin"
+    ) {
       setIsTyping(true);
     }
-  });
+  };
 
-  socket.on("stopTyping", (data) => {
-    if (data.chatId === activeChat?._id) {
+  const stopTypingHandler = (data) => {
+
+    if (
+      data.chatId === chatId &&
+      data.sender === "admin"
+    ) {
       setIsTyping(false);
     }
-  });
+  };
+
+  socket.on("typing", typingHandler);
+  socket.on("stopTyping", stopTypingHandler);
 
   return () => {
-    socket.off("typing");
-    socket.off("stopTyping");
+    socket.off("typing", typingHandler);
+    socket.off("stopTyping", stopTypingHandler);
   };
-}, [activeChat]);
+
+}, [chatId]);
 
     const status = formatLastSeen(
         activeChat?.userId?._id,
         activeChat?.userId?.lastSeen
     );
+
+    const isUserOnline = activeChat?.userId?._id
+    ? onlineUsers.includes(activeChat.userId._id.toString())
+    : false;
+
+    const handleTyping = (e) => {
+
+  setInput(e.target.value);
+
+  socket.emit("typing", {
+    chatId: activeChat?._id,
+    sender: "admin",
+  });
+
+  clearTimeout(window.adminTypingTimeout);
+
+  window.adminTypingTimeout = setTimeout(() => {
+
+    socket.emit("stopTyping", {
+      chatId: activeChat?._id,
+      sender: "admin",
+    });
+
+  }, 1000);
+};
 
   return (
   <div className="h-screen flex flex-col md:grid md:grid-cols-3 
@@ -264,10 +300,10 @@ const AdminChat = () => {
 
                 <p
                     className={`text-xs font-medium ${
-                    status === "Online" ? "text-green-500" : "text-gray-500"
+                    isUserOnline ? "text-green-500" : "text-gray-500"
                     }`}
                 >
-                    {status === "Online"
+                    {isUserOnline
                     ? "● Online"
                     : `Last seen: ${status}`}
                 </p>
@@ -276,7 +312,7 @@ const AdminChat = () => {
 
         <span
             className={`text-xs font-medium flex items-center gap-1 ${
-                onlineUsers.includes(activeChat?.userId?._id)
+                isUserOnline.includes(activeChat?.userId?._id)
                 ? "text-green-500"
                 : "text-gray-400"
             }`}
@@ -301,7 +337,7 @@ const AdminChat = () => {
         bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200">
 
         {messages.map((msg, i) => {
-          const isAdmin = msg.sender === "admin";
+          const isAdmin = msg.senderType === "admin";
 
           return (
             <div
@@ -344,7 +380,7 @@ const AdminChat = () => {
 
           <input
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleTyping}
             className="flex-1 border border-gray-200 
             rounded-full px-4 py-2 text-sm 
             bg-gray-50 text-gray-800 placeholder-gray-400

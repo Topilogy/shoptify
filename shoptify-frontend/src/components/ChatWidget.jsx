@@ -115,7 +115,10 @@ useEffect(() => {
   clearTimeout(window.typingTimeout);
 
   window.typingTimeout = setTimeout(() => {
-    socket.emit("stopTyping", { chatId });
+    socket.emit("stopTyping", {
+      chatId,
+      sender: "user",
+    });
   }, 1000);
 };
 
