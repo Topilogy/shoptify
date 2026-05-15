@@ -179,30 +179,32 @@ const AdminChat = () => {
         activeChat?.userId?.lastSeen
     );
 
-    const isUserOnline = activeChat?.userId?._id
-    ? onlineUsers.includes(activeChat.userId._id.toString())
-    : false;
+    const isUserOnline =
+      activeChat?.userId?._id &&
+      onlineUsers.some(
+      (id) => id.toString() === activeChat.userId._id.toString()
+    );
 
     const handleTyping = (e) => {
 
-  setInput(e.target.value);
+      setInput(e.target.value);
 
-  socket.emit("typing", {
-    chatId: activeChat?._id,
-    sender: "admin",
-  });
+      socket.emit("typing", {
+        chatId: activeChat?._id,
+        sender: "admin",
+      });
 
-  clearTimeout(window.adminTypingTimeout);
+      clearTimeout(window.adminTypingTimeout);
 
-  window.adminTypingTimeout = setTimeout(() => {
+      window.adminTypingTimeout = setTimeout(() => {
 
-    socket.emit("stopTyping", {
-      chatId: activeChat?._id,
-      sender: "admin",
-    });
+        socket.emit("stopTyping", {
+          chatId: activeChat?._id,
+          sender: "admin",
+        });
 
-  }, 1000);
-};
+      }, 1000);
+    };
 
   return (
   <div className="h-screen flex flex-col md:grid md:grid-cols-3 
@@ -312,20 +314,20 @@ const AdminChat = () => {
 
         <span
             className={`text-xs font-medium flex items-center gap-1 ${
-                isUserOnline.includes(activeChat?.userId?._id)
+                isUserOnline
                 ? "text-green-500"
                 : "text-gray-400"
             }`}
             >
             <span
                 className={`w-2 h-2 rounded-full ${
-                onlineUsers.includes(activeChat?.userId?._id)
+                isUserOnline
                     ? "bg-green-500"
                     : "bg-gray-400"
                 }`}
             ></span>
 
-            {onlineUsers.includes(activeChat?.userId?._id)
+            {isUserOnline
                 ? "Online"
                 : "Offline"
             }

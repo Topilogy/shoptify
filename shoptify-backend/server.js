@@ -110,9 +110,15 @@ socket.on("stopTyping", ({ chatId, sender }) => {
   socket.on("disconnect", async () => {
       try {
 
-        for (let [userId, data] of onlineUsers.entries()) {
+        console.log("DISCONNECTED:", socket.id);
+
+        for (const [userId, data] of onlineUsers.entries()) {
+
+          console.log("CHECKING:", data);
 
           if (data.socketId === socket.id) {
+
+            console.log("REMOVING USER:", userId);
 
             onlineUsers.delete(userId);
 
@@ -128,10 +134,10 @@ socket.on("stopTyping", ({ chatId, sender }) => {
 
         io.emit("onlineUsers", Array.from(onlineUsers.keys()));
 
-        console.log("User disconnected:", socket.id);
-
       } catch (err) {
+
         console.log("Disconnect error:", err.message);
+
       }
     });
   });
