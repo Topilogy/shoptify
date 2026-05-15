@@ -144,35 +144,37 @@ const AdminChat = () => {
 
     useEffect(() => {
 
-  const typingHandler = (data) => {
+      const typingHandler = (data) => {
 
-    if (
-      data.chatId === chatId &&
-      data.sender === "admin"
-    ) {
-      setIsTyping(true);
-    }
-  };
+        if (
+          data.chatId === activeChat?._id &&
+          data.senderType === "user"
+        ) {
+          setIsTyping(true);
+        }
+      };
 
-  const stopTypingHandler = (data) => {
+      const stopTypingHandler = (data) => {
 
-    if (
-      data.chatId === chatId &&
-      data.sender === "admin"
-    ) {
-      setIsTyping(false);
-    }
-  };
+        if (
+          data.chatId === activeChat?._id &&
+          data.senderType === "user"
+        ) {
+          setIsTyping(false);
+        }
+      };
 
-  socket.on("typing", typingHandler);
-  socket.on("stopTyping", stopTypingHandler);
+      socket.on("typing", typingHandler);
+      socket.on("stopTyping", stopTypingHandler);
 
-  return () => {
-    socket.off("typing", typingHandler);
-    socket.off("stopTyping", stopTypingHandler);
-  };
+      return () => {
 
-}, [chatId]);
+        socket.off("typing", typingHandler);
+        socket.off("stopTyping", stopTypingHandler);
+
+      };
+
+    }, [activeChat]);
 
     const status = formatLastSeen(
         activeChat?.userId?._id,
@@ -181,8 +183,8 @@ const AdminChat = () => {
 
     const isUserOnline =
       activeChat?.userId?._id &&
-      onlineUsers.some(
-      (id) => id.toString() === activeChat.userId._id.toString()
+      onlineUsers.includes(
+      activeChat.userId._id.toString()
     );
 
     const handleTyping = (e) => {
@@ -191,7 +193,7 @@ const AdminChat = () => {
 
       socket.emit("typing", {
         chatId: activeChat?._id,
-        sender: "admin",
+        senderType: "admin",
       });
 
       clearTimeout(window.adminTypingTimeout);
@@ -200,7 +202,7 @@ const AdminChat = () => {
 
         socket.emit("stopTyping", {
           chatId: activeChat?._id,
-          sender: "admin",
+          senderType: "admin",
         });
 
       }, 1000);

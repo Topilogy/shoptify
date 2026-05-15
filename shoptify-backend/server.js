@@ -36,111 +36,87 @@ app.set("io", io);
 
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+
+  console.log("CONNECTED:", socket.id);
 
   // ================= REGISTER USER =================
   socket.on("registerUser", (userId) => {
+
     if (!userId) return;
 
-    socket.userId = userId; // ✅ attach to socket
-    onlineUsers.set(userId, {
-      socketId: socket.id,
-      lastActive: Date.now(),
-    });
+    socket.userId = userId;
 
-    io.emit("onlineUsers", Array.from(onlineUsers.keys()));
-  });
+    onlineUsers.set(userId.toString(), socket.id);
 
-  socket.on("heartbeat", (userId) => {
-    const user = onlineUsers.get(userId);
+    io.emit(
+      "onlineUsers",
+      Array.from(onlineUsers.keys())
+    );
 
-    if (user) {
-      onlineUsers.set(userId, {
-        ...user,
-        lastActive: Date.now(),
-      });
-    }
+    console.log("ONLINE USERS:", Array.from(onlineUsers.keys()));
   });
 
   // ================= JOIN CHAT =================
   socket.on("joinChat", (chatId) => {
-  socket.join(chatId);
-  console.log("Joined room:", chatId);
-});
 
-  // ================= SEND MESSAGE =================
-  socket.on("sendMessage", async ({ chatId, message }) => {
-    try {
-      if (!chatId || !message) return;
+    socket.join(chatId);
 
-      const Chat = require("./models/Chat2");
-
-      // ✅ Save message
-      await Chat.findByIdAndUpdate(chatId, {
-        $push: { messages: message },
-      });
-
-      // ✅ Broadcast message
-      io.to(chatId).emit("receiveMessage", {
-        chatId,
-        ...message, // sender + text
-      });
-
-    } catch (err) {
-      console.log("Socket sendMessage error:", err.message);
-    }
+    console.log("JOINED CHAT:", chatId);
   });
 
   // ================= TYPING =================
-  socket.on("typing", ({ chatId, sender }) => {
-  socket.to(chatId).emit("typing", {
-    chatId,
-    sender, // "user" or "admin"
-  });
-});
+  socket.on("typing", ({ chatId, senderType }) => {
 
-socket.on("stopTyping", ({ chatId, sender }) => {
-  socket.to(chatId).emit("stopTyping", {
-    chatId,
-    sender,
+    socket.to(chatId).emit("typing", {
+      chatId,
+      senderType,
+    });
   });
-});
+
+  socket.on("stopTyping", ({ chatId, senderType }) => {
+
+    socket.to(chatId).emit("stopTyping", {
+      chatId,
+      senderType,
+    });
+  });
 
   // ================= DISCONNECT =================
   socket.on("disconnect", async () => {
-      try {
 
-        console.log("DISCONNECTED:", socket.id);
+    try {
 
-        for (const [userId, data] of onlineUsers.entries()) {
+      console.log("DISCONNECTED:", socket.id);
 
-          console.log("CHECKING:", data);
+      for (const [userId, sockId] of onlineUsers.entries()) {
 
-          if (data.socketId === socket.id) {
+        if (sockId === socket.id) {
 
-            console.log("REMOVING USER:", userId);
+          onlineUsers.delete(userId);
 
-            onlineUsers.delete(userId);
+          const User = require("./models/User");
 
-            const User = require("./models/User");
+          await User.findByIdAndUpdate(userId, {
+            lastSeen: new Date(),
+          });
 
-            await User.findByIdAndUpdate(userId, {
-              lastSeen: new Date(),
-            });
-
-            break;
-          }
+          break;
         }
-
-        io.emit("onlineUsers", Array.from(onlineUsers.keys()));
-
-      } catch (err) {
-
-        console.log("Disconnect error:", err.message);
-
       }
-    });
+
+      io.emit(
+        "onlineUsers",
+        Array.from(onlineUsers.keys())
+      );
+
+    } catch (err) {
+
+      console.log(err.message);
+
+    }
   });
+
+});
 
 setInterval(() => {
   const now = Date.now();

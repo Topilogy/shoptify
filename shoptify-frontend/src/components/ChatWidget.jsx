@@ -50,10 +50,7 @@ const ChatWidget = () => {
     //   text: input,
     // };
 
-    socket.emit("sendMessage", {
-      chatId,
-    //   message,
-    });
+    
 
     // setMessages((prev) => [...prev, message]);
     setMessages(data.messages);
@@ -87,20 +84,38 @@ useEffect(() => {
 
   // ================= LOAD CHAT =================
   useEffect(() => {
-  if (!user?._id) return;
 
-  const interval = setInterval(async () => {
-    try {
-      const { data } = await API.get("/chat");
-      setMessages(data.messages || []);
-    } catch (err) {
-      console.log(err);
+  const typingHandler = (data) => {
+
+    if (
+      data.chatId === chatId &&
+      data.senderType === "admin"
+    ) {
+      setIsTyping(true);
     }
-  }, 3000);
+  };
 
-  return () => clearInterval(interval);
+  const stopTypingHandler = (data) => {
 
-}, [user]);
+    if (
+      data.chatId === chatId &&
+      data.senderType === "admin"
+    ) {
+      setIsTyping(false);
+    }
+  };
+
+  socket.on("typing", typingHandler);
+  socket.on("stopTyping", stopTypingHandler);
+
+  return () => {
+
+    socket.off("typing", typingHandler);
+    socket.off("stopTyping", stopTypingHandler);
+
+  };
+
+}, [chatId]);
 
   const handleTyping = (e) => {
   setInput(e.target.value);
@@ -109,7 +124,7 @@ useEffect(() => {
 
   socket.emit("typing", {
     chatId,
-    sender: "user",
+    senderType: "user",
   });
 
   clearTimeout(window.typingTimeout);
@@ -117,7 +132,7 @@ useEffect(() => {
   window.typingTimeout = setTimeout(() => {
     socket.emit("stopTyping", {
       chatId,
-      sender: "user",
+      senderType: "user",
     });
   }, 1000);
 };
@@ -130,7 +145,7 @@ useEffect(() => {
 
 useEffect(() => {
   socket.on("typing", (data) => {
-    if (data.chatId === chatId && data.sender === "admin") {
+    if (data.chatId === chatId && data.senderType === "admin") {
       setIsTyping(true);
     }
   });
