@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 // import axios from "axios";
-import { useRef } from "react";
 import { io } from "socket.io-client";
 import  API  from "../services/api";
 import socket from "../services/socket";
@@ -14,12 +13,12 @@ const AdminChat = () => {
   const [activeChat, setActiveChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
-  const bottomRef = useRef();
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [unread, setUnread] = useState({});
   const [isTyping, setIsTyping] = useState(false);
 
   const { user } = useAuth();
+  const bottomRef = useRef();
  
 
   // ================= LOAD ALL CHATS =================
@@ -91,6 +90,7 @@ const AdminChat = () => {
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
+    
 
     useEffect(() => {
         const interval = setInterval(async () => {
@@ -181,11 +181,15 @@ const AdminChat = () => {
         activeChat?.userId?.lastSeen
     );
 
-    const isUserOnline =
+    // const isUserOnline =
+    //   activeChat?.userId?._id &&
+    //   onlineUsers.includes(
+    //   activeChat.userId._id.toString()
+    // );
+
+     const isUserOnline =
       activeChat?.userId?._id &&
-      onlineUsers.includes(
-      activeChat.userId._id.toString()
-    );
+      onlineUsers.includes(String(activeChat.userId._id));
 
     const handleTyping = (e) => {
 
@@ -366,7 +370,7 @@ const AdminChat = () => {
         })}
         {isTyping && (
             <div className="flex items-center gap-1 text-gray-400 text-xs italic">
-                User is typing
+                User is typing...
                 <span className="animate-bounce">.</span>
                 <span className="animate-bounce delay-150">.</span>
                 <span className="animate-bounce delay-300">.</span>

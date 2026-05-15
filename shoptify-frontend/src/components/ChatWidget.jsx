@@ -84,38 +84,20 @@ useEffect(() => {
 
   // ================= LOAD CHAT =================
   useEffect(() => {
+  if (!user?._id) return;
 
-  const typingHandler = (data) => {
-
-    if (
-      data.chatId === chatId &&
-      data.senderType === "admin"
-    ) {
-      setIsTyping(true);
+  const interval = setInterval(async () => {
+    try {
+      const { data } = await API.get("/chat");
+      setMessages(data.messages || []);
+    } catch (err) {
+      console.log(err);
     }
-  };
+  }, 3000);
 
-  const stopTypingHandler = (data) => {
+  return () => clearInterval(interval);
 
-    if (
-      data.chatId === chatId &&
-      data.senderType === "admin"
-    ) {
-      setIsTyping(false);
-    }
-  };
-
-  socket.on("typing", typingHandler);
-  socket.on("stopTyping", stopTypingHandler);
-
-  return () => {
-
-    socket.off("typing", typingHandler);
-    socket.off("stopTyping", stopTypingHandler);
-
-  };
-
-}, [chatId]);
+}, [user]);
 
   const handleTyping = (e) => {
   setInput(e.target.value);
@@ -145,7 +127,7 @@ useEffect(() => {
 
 useEffect(() => {
   socket.on("typing", (data) => {
-    if (data.chatId === chatId && data.senderType === "admin") {
+    if (data.chatId === chatId && data.sender === "admin") {
       setIsTyping(true);
     }
   });

@@ -118,18 +118,18 @@ io.on("connection", (socket) => {
 
 });
 
-setInterval(() => {
-  const now = Date.now();
-  const timeout = 60 * 1000;
+// setInterval(() => {
+//   const now = Date.now();
+//   const timeout = 60 * 1000;
 
-  for (let [userId, data] of onlineUsers.entries()) {
-    if (now - data.lastActive > timeout) {
-      onlineUsers.delete(userId);
-    }
-  }
+//   for (let [userId, data] of onlineUsers.entries()) {
+//     if (now - data.lastActive > timeout) {
+//       onlineUsers.delete(userId);
+//     }
+//   }
 
-  io.emit("onlineUsers", Array.from(onlineUsers.keys()));
-}, 30000);
+//   io.emit("onlineUsers", Array.from(onlineUsers.keys()));
+// }, 30000)
 
 // ================= AXIOS RETRY =================
 axiosRetry(axios, {
