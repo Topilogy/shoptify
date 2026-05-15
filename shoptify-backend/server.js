@@ -13,7 +13,7 @@ const axios = require("axios");
 const axiosRetry = require("axios-retry").default;
 
 const Order = require("./models/Order");
-const Chat = require("./models/Chat2");
+const Chat = require("./models/Chat");
 
 // ================= INIT APP =================
 const app = express();
