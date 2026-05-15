@@ -13,7 +13,7 @@ const axios = require("axios");
 const axiosRetry = require("axios-retry").default;
 
 const Order = require("./models/Order");
-const Chat = require("./models/Chat");
+const Chat = require("./models/Chat2");
 
 // ================= INIT APP =================
 const app = express();
@@ -73,7 +73,7 @@ io.on("connection", (socket) => {
     try {
       if (!chatId || !message) return;
 
-      const Chat = require("./models/Chat");
+      const Chat = require("./models/Chat2");
 
       // ✅ Save message
       await Chat.findByIdAndUpdate(chatId, {
