@@ -15,7 +15,9 @@ const ChatWidget = () => {
   const [chatId, setChatId] = useState(null);
 //   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  let typingTimeout = null;
+
+  const typingRef = useRef(null);
+  // let typingTimeout = null;
   
 
   const { user } = useAuth();
@@ -36,88 +38,79 @@ const ChatWidget = () => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    if (!user?._id) {
-      alert("Please login first");
-      return;
-    }
-
     const { data } = await API.post("/chat", {
         text: input,
     });
 
-    // const message = {
-    //   sender: "user",
-    //   text: input,
-    // };
+    const message = {
+      sender: "user",
+      text: input,
+    };
 
     socket.emit("sendMessage", {
       chatId,
-    //   message,
+      message,
     });
 
-    // setMessages((prev) => [...prev, message]);
+    setMessages((prev) => [...prev, message]);
     setMessages(data.messages);
     setInput("");
   };
 
- useEffect(() => {
-  if (user?._id) {
+  useEffect(() => {
     fetchChat();
-  }
-}, [user]);
+  }, []);
 
   // ================= SOCKET LISTENER =================
   useEffect(() => {
     const handler = (msg) => {
+      if (msg.chatId === chatId) {
         setMessages((prev) => [...prev, msg]);
+      }
     };
 
     socket.on("receiveMessage", handler);
 
-    return () => {
-        socket.off("receiveMessage", handler);
-    };
-  }, []);
+    return () => socket.off("receiveMessage", handler);
+  }, [chatId]);
 
 useEffect(() => {
   if (!user?._id) return;
 
-  socket.emit("registerUser", user._id);
+  const initChat = async () => {
+    const { data } = await API.get("/chat");
+
+    setMessages(data.messages || []);
+
+    if (data._id) {
+      setChatId(data._id);
+      socket.emit("joinChat", data._id);
+    }
+  };
+
+  initChat();
 }, [user]);
 
   // ================= LOAD CHAT =================
-  useEffect(() => {
-  if (!user?._id) return;
-
-  const interval = setInterval(async () => {
-    try {
-      const { data } = await API.get("/chat");
-      setMessages(data.messages || []);
-    } catch (err) {
-      console.log(err);
-    }
-  }, 3000);
-
-  return () => clearInterval(interval);
-
-}, [user]);
+  
 
   const handleTyping = (e) => {
-  setInput(e.target.value);
+    setInput(e.target.value);
 
-  console.log("Typing event sent", chatId);
+    socket.emit("typing", {
+      chatId,
+      sender: "user",
+    });
 
-  socket.emit("typing", {
-    chatId,
-    sender: "user",
-  });
+    if (typingRef.current) clearTimeout(typingRef.current);
 
-  clearTimeout(window.typingTimeout);
-
-  window.typingTimeout = setTimeout(() => {
-    socket.emit("stopTyping", { chatId });
-  }, 1000);
-};
+    typingRef.current = setTimeout(() => {
+      socket.emit("stopTyping", {
+        chatId,
+        sender: "user",
+      });
+    }, 1000);
+  };
 
   const handleStopTyping = () => {
     socket.emit("stopTyping", {
@@ -176,22 +169,17 @@ useEffect(() => {
           {/* MESSAGES */}
           <div className="flex-1 p-3 overflow-y-auto max-h-80">
             {messages.map((msg, i) => {
-              const isUser = msg.senderType === "user";
+              const isUser = msg.sender === "user";
 
               return (
                 <div
                   key={i}
                   className={`text-sm p-2 rounded-lg max-w-[75%] mb-2 ${
-                    isUser ? "bg-blue-600 text-white ml-auto" : "bg-gray-100"
+                    isUser
+                      ? "bg-blue-600 text-white ml-auto"
+                      : "bg-gray-100"
                   }`}
                 >
-                  {/* 👇 ADD THIS */}
-                  <div className="text-[10px] opacity-70 mb-1">
-                    {msg.senderType === "user"
-                      ? msg.senderName || "You"
-                      : "Support"}
-                  </div>
-
                   {msg.text}
                 </div>
               );

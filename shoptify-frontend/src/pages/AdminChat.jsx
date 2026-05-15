@@ -14,11 +14,11 @@ const AdminChat = () => {
   const [activeChat, setActiveChat] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const bottomRef = useRef();
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [unread, setUnread] = useState({});
   const [isTyping, setIsTyping] = useState(false);
 
-  const bottomRef = useRef();
   const { user } = useAuth();
  
 
@@ -26,6 +26,7 @@ const AdminChat = () => {
   const fetchChats = async () => {
     try {
         const { data } = await API.get("/chat/admin/all");
+        console.log("ADMIN CHAT RESPONSE:", data); 
         setChats(Array.isArray(data) ? data : []);
     } catch (err) {
         console.error("FULL ERROR:", err.response?.data || err.message);
@@ -45,12 +46,10 @@ const AdminChat = () => {
     const sendMessage = async () => {
         if (!input.trim() || !activeChat) return;
 
-          const { data } = await API.post(
-            `/chat/admin/${activeChat._id}`,
-            { text: input }
-          );
-          
-        setMessages(data.messages || []);
+        await API.post(`/chat/admin/${activeChat._id}`, {
+        text: input,
+        });
+
         setInput("");
     };
 
@@ -62,21 +61,23 @@ const AdminChat = () => {
     }, []);
 
     useEffect(() => {
-    const handler = (msg) => {
-      if (msg.chatId === activeChat?._id) {
-        setMessages((prev) => [...prev, msg]);
-      } else {
-        setUnread((prev) => ({
-          ...prev,
-          [msg.chatId]: (prev[msg.chatId] || 0) + 1,
-        }));
-      }
-    };
+        const handler = (msg) => {
+            if (activeChat?._id !== msg.chatId) {
+            setUnread((prev) => ({
+                ...prev,
+                [msg.chatId]: (prev[msg.chatId] || 0) + 1,
+            }));
+            }
 
-    socket.on("receiveMessage", handler);
+            setMessages((prev) => [...prev, msg]);
+        };
 
-    return () => socket.off("receiveMessage", handler);
-  }, [activeChat]);
+        socket.on("receiveMessage", handler);
+
+        return () => {
+            socket.off("receiveMessage", handler);
+        };
+    }, [activeChat]);
 
     useEffect(() => {
         socket.on("onlineUsers", (users) => {
@@ -92,22 +93,26 @@ const AdminChat = () => {
     }, [messages]);
 
     useEffect(() => {
-    const interval = setInterval(async () => {
-      const { data } = await API.get("/chat/admin/all");
+        const interval = setInterval(async () => {
+            const { data } = await API.get("/chat/admin/all");
+            const chats = Array.isArray(data) ? data : [];
 
-      const chats = Array.isArray(data) ? data : [];
-      setChats(chats);
+            setChats(chats);
 
-      if (activeChat) {
-        const updated = chats.find((c) => c._id === activeChat._id);
-        if (updated) {
-          setMessages(updated.messages || []);
-        }
-      }
-    }, 3000);
+            // 🔥 update active chat LIVE
+            if (activeChat) {
+                const updated = chats.find(
+                    (c) => c._id === activeChat._id
+                );
 
-    return () => clearInterval(interval);
-  }, [activeChat]);
+                if (updated) {
+                    setMessages(updated.messages || []);
+                }
+            }
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [activeChat]);
 
     const formatLastSeen = (userId, date) => {
         // ✅ If user is online → override everything
@@ -138,40 +143,30 @@ const AdminChat = () => {
     }, [user]);
 
     useEffect(() => {
-    socket.on("typing", (data) => {
-      if (
-        data.chatId === activeChat?._id &&
-        data.sender === "user"
-      ) {
-        setIsTyping(true);
-      }
-    });
+  socket.on("typing", (data) => {
+    console.log("Typing event received:", data);
 
-    socket.on("stopTyping", (data) => {
-      if (
-        data.chatId === activeChat?._id &&
-        data.sender === "user"
-      ) {
-        setIsTyping(false);
-      }
-    });
+    if (data.chatId === activeChat?._id) {
+      setIsTyping(true);
+    }
+  });
 
-    return () => {
-      socket.off("typing");
-      socket.off("stopTyping");
-    };
-  }, [activeChat]);
+  socket.on("stopTyping", (data) => {
+    if (data.chatId === activeChat?._id) {
+      setIsTyping(false);
+    }
+  });
+
+  return () => {
+    socket.off("typing");
+    socket.off("stopTyping");
+  };
+}, [activeChat]);
 
     const status = formatLastSeen(
         activeChat?.userId?._id,
         activeChat?.userId?.lastSeen
     );
-
-
-  const isOnline = onlineUsers.includes(
-    activeChat?.userId?._id
-  );
-
 
   return (
   <div className="h-screen flex flex-col md:grid md:grid-cols-3 
@@ -208,7 +203,7 @@ const AdminChat = () => {
                   : "text-gray-900"
               }`}
             >
-              {chat.userId?.name || "User"}
+              {chat.userId?.name || chat.userId?.email || "Customer"}
             </p>
 
             <p

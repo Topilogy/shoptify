@@ -18,7 +18,7 @@ import Success from "./pages/Success";
 import AdminLayout from "./layouts/AdminLayout";
 import ProductDetails from "./pages/ProductDetails";
 import CategoryProduct from "./pages/CategoryProduct";
-import AdminChat from "./pages/AdminChat";
+import AdminChat from "./pages/AdminChat2";
 
 const Layout = () => {
   const location = useLocation();

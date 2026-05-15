@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import ChatWidget from "../components/ChatWidget";
+import ChatWidget from "./ChatWidget2";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false); // mobile
